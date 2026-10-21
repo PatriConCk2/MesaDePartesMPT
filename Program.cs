@@ -96,12 +96,137 @@ namespace MesaDePartesMPT
         }
 
         //Parte de Patrick
-        static bool ValidarFecha(string fecha) { return true; }
-        static string PedirFecha() { return ""; }
-        static bool EsBisiesto(int year) { return false; }
-        static int FechaANumero(string fecha) { return 0; }
-        static bool ValidarFormatoCodigo(string codigo) { return true; }
-        static string PedirTextoObligatorio(string mensaje) { return ""; }
+        static bool ValidarFecha(string fecha)
+        {
+            if (fecha.Length != 10)
+            {
+                return false;
+            }
+            
+            if (fecha.Substring(2, 1) != "/" || fecha.Substring(5, 1) != "/")
+            {
+                return false;
+            }
+
+            for (int i = 0; i < 10; i++)
+            {
+                if (i != 2 && i != 5) 
+                {
+                    if (!char.IsDigit(fecha[i]))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            int dia = int.Parse(fecha.Substring(0, 2));
+            int mes = int.Parse(fecha.Substring(3, 2));
+            int anio = int.Parse(fecha.Substring(6, 4));
+
+            if (anio < 1900 || anio > 2100 || mes < 1 || mes > 12)
+            {
+                return false;
+            }
+
+            int diasMes;
+            switch (mes)
+            {
+                case 2:
+                    diasMes = EsBisiesto(anio) ? 29 : 28;
+                    break;
+                case 4: case 6: case 9: case 11:
+                    diasMes = 30;
+                    break;
+                default:
+                    diasMes = 31;
+                    break;
+            }
+
+            if (dia < 1 || dia > diasMes)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        static string PedirFecha()
+        {
+            string resultado;
+            bool valida;
+            do
+            {
+                Console.WriteLine("Fecha de recepcion (DD/MM/AAAA):");
+                resultado = Console.ReadLine();
+                valida = ValidarFecha(resultado);
+
+                if (!valida)
+                {
+                    Console.WriteLine("Error: fecha invalida. Use el formato DD/MM/AAAA.");
+                }
+            } while (!valida);
+
+            return resultado;
+        }
+
+        static bool EsBisiesto(int year)
+        {
+            if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        static int FechaANumero(string fecha)
+        {
+            int dia = int.Parse(fecha.Substring(0, 2));
+            int mes = int.Parse(fecha.Substring(3, 2));
+            int anio = int.Parse(fecha.Substring(6, 4));
+            
+            mes = mes * 100;
+            anio = anio * 10000;
+            return anio + mes + dia;
+        }
+
+        static bool ValidarFormatoCodigo(string codigo)
+        {
+            if (codigo.Length != 7)
+            {
+                return false;
+            }
+            if (codigo.Substring(0, 4) != "EXP-")
+            {
+                return false;
+            }
+
+            for (int i = 4; i < 7; i++)
+            {
+                if (!char.IsDigit(codigo[i]))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        static string PedirTextoObligatorio(string mensaje)
+        {
+            string resultado;
+            do
+            {
+                Console.WriteLine(mensaje);
+                resultado = Console.ReadLine();
+
+                if (string.IsNullOrWhiteSpace(resultado))
+                {
+                    Console.WriteLine("Error: este campo es obligatorio.");
+                    Console.WriteLine("Por favor, ingrese un dato.");
+                }
+            } while (string.IsNullOrWhiteSpace(resultado));
+
+            return resultado;
+        }
 
         //Parte de Gustavo
         static void Registrar(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, string[] tiposTramite, ref int total, int CAPACIDAD) { }
