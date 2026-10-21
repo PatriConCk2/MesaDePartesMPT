@@ -229,10 +229,98 @@ namespace MesaDePartesMPT
         }
 
         //Parte de Gustavo
-        static void Registrar(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, string[] tiposTramite, ref int total, int CAPACIDAD) { }
-        static void BuscarExpediente(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, int total) { }
-        static int BuscarPosicion(string[] codigos, int total, string codeABuscar) { return -1; }
-        static string PedirTipoTramite(string[] tiposTramite) { return ""; }
+        //Parte de Gustavo
+        static void Registrar(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, string[] tiposTramite, ref int total, int CAPACIDAD)
+        {
+            if (total >= CAPACIDAD)
+            {
+                Console.WriteLine("ERROR: capacidad completa.");
+                return; // Sale del método para no registrar
+            }
+
+            string codigo = PedirTextoObligatorio("Codigo (ej. EXP-001):").ToUpper();
+
+            if (!ValidarFormatoCodigo(codigo))
+            {
+                Console.WriteLine("ERROR: el codigo debe tener el formato EXP-001. No se registro.");
+                return;
+            }
+
+            if (BuscarPosicion(codigos, total, codigo) != -1)
+            {
+                Console.WriteLine("ERROR: el codigo ya existe. No se registro.");
+                return;
+            }
+
+            string solicitante = PedirTextoObligatorio("Solicitante (ficticio):");
+            string tipo = PedirTipoTramite(tiposTramite);
+            string asunto = PedirTextoObligatorio("Asunto:");
+            string fecha = PedirFecha();
+
+            // Guardamos los datos en la posición actual (C# empieza en 0)
+            codigos[total] = codigo;
+            solicitantes[total] = solicitante;
+            tipos[total] = tipo;
+            asuntos[total] = asunto;
+            fechas[total] = fecha;
+            estados[total] = "Recibido";
+            
+            total++; // Aumentamos el total al final
+
+            Console.WriteLine("Expediente " + codigo + " registrado correctamente.");
+        }
+
+        static void BuscarExpediente(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, int total)
+        {
+            string cod = PedirTextoObligatorio("¿Cual es su codigo?").ToUpper();
+            int pos = BuscarPosicion(codigos, total, cod);
+
+            if (pos == -1)
+            {
+                Console.WriteLine("No se encontro el codigo");
+            }
+            else
+            {
+                MostrarExpediente(codigos, solicitantes, tipos, asuntos, fechas, estados, pos);
+            }
+        }
+
+        static int BuscarPosicion(string[] codigos, int total, string codeABuscar)
+        {
+            // Búsqueda secuencial
+            for (int i = 0; i < total; i++)
+            {
+                if (codigos[i] == codeABuscar)
+                {
+                    return i; // Retorna la posición exacta en el arreglo
+                }
+            }
+            return -1; // Retorna -1 si no existe
+        }
+
+        static string PedirTipoTramite(string[] tiposTramite)
+        {
+            int opcn;
+            bool esNumero;
+            do
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    Console.WriteLine((i + 1) + ". " + tiposTramite[i]);
+                }
+
+                Console.WriteLine("Elija el tipo de tramite (1-4):");
+                string input = Console.ReadLine();
+                esNumero = int.TryParse(input, out opcn);
+
+                if (!esNumero || opcn < 1 || opcn > 4)
+                {
+                    Console.WriteLine("Error: opcion invalida. Elija un numero del 1 al 4.");
+                }
+
+            } while (!esNumero || opcn < 1 || opcn > 4);
+
+            return tiposTramite[opcn - 1]; // -1 porque el usuario ve del 1 al 4, pero el arreglo es de 0 a 3
 
         //Parte de Pedro
         static void Ordenar(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, int total) { }
