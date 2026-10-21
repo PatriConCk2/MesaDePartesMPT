@@ -228,14 +228,14 @@ namespace MesaDePartesMPT
             return resultado;
         }
 
-        //Parte de Gustavo
+    
         //Parte de Gustavo
         static void Registrar(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, string[] tiposTramite, ref int total, int CAPACIDAD)
         {
             if (total >= CAPACIDAD)
             {
                 Console.WriteLine("ERROR: capacidad completa.");
-                return; // Sale del método para no registrar
+                return; 
             }
 
             string codigo = PedirTextoObligatorio("Codigo (ej. EXP-001):").ToUpper();
@@ -257,7 +257,7 @@ namespace MesaDePartesMPT
             string asunto = PedirTextoObligatorio("Asunto:");
             string fecha = PedirFecha();
 
-            // Guardamos los datos en la posición actual (C# empieza en 0)
+            
             codigos[total] = codigo;
             solicitantes[total] = solicitante;
             tipos[total] = tipo;
@@ -265,7 +265,7 @@ namespace MesaDePartesMPT
             fechas[total] = fecha;
             estados[total] = "Recibido";
             
-            total++; // Aumentamos el total al final
+            total++; 
 
             Console.WriteLine("Expediente " + codigo + " registrado correctamente.");
         }
@@ -287,15 +287,15 @@ namespace MesaDePartesMPT
 
         static int BuscarPosicion(string[] codigos, int total, string codeABuscar)
         {
-            // Búsqueda secuencial
+           
             for (int i = 0; i < total; i++)
             {
                 if (codigos[i] == codeABuscar)
                 {
-                    return i; // Retorna la posición exacta en el arreglo
+                    return i; 
                 }
             }
-            return -1; // Retorna -1 si no existe
+            return -1; 
         }
 
         static string PedirTipoTramite(string[] tiposTramite)
@@ -320,7 +320,7 @@ namespace MesaDePartesMPT
 
             } while (!esNumero || opcn < 1 || opcn > 4);
 
-            return tiposTramite[opcn - 1]; // -1 porque el usuario ve del 1 al 4, pero el arreglo es de 0 a 3
+            return tiposTramite[opcn - 1]; 
 
         //Parte de Pedro
         static void Ordenar(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, int total) { }
