@@ -3,20 +3,20 @@ using System;
 namespace MesaDePartesMPT
 {
     class Program
-    {  
-        //Parte de Jhonatan
+    {
+        // Parte de Jhonatan
         static void Main(string[] args)
         {
             int total = 0;
-            int CAPACIDAD = 100;
+            const int CAPACIDAD = 100;
             string opMenu = "0";
 
-            string[] codigos = new string[100];
-            string[] solicitantes = new string[100];
-            string[] tipos = new string[100];
-            string[] asuntos = new string[100];
-            string[] fechas = new string[100];
-            string[] estados = new string[100];
+            string[] codigos = new string[CAPACIDAD];
+            string[] solicitantes = new string[CAPACIDAD];
+            string[] tipos = new string[CAPACIDAD];
+            string[] asuntos = new string[CAPACIDAD];
+            string[] fechas = new string[CAPACIDAD];
+            string[] estados = new string[CAPACIDAD];
             string[] tiposTramite = new string[4];
 
             tiposTramite[0] = "Solicitud administrativa general (FUT)";
@@ -28,7 +28,7 @@ namespace MesaDePartesMPT
             {
                 MostrarMenu();
                 Console.Write("Elija una opcion: ");
-                opMenu = Console.ReadLine();
+                opMenu = LeerTexto();
 
                 if (opMenu == "1")
                 {
@@ -54,7 +54,7 @@ namespace MesaDePartesMPT
                 {
                     Console.WriteLine("ERROR: opcion invalida. Elija un numero del 1 al 5.");
                 }
-                Console.WriteLine(); //simplemente un espacio
+                Console.WriteLine();
             }
         }
 
@@ -95,7 +95,14 @@ namespace MesaDePartesMPT
             }
         }
 
-        //Parte de Patrick
+        //parte de Patrick
+        // Lee una linea del teclado, evita null y quita espacios al inicio y al final
+        static string LeerTexto()
+        {
+            string texto = Console.ReadLine() ?? "";
+            return texto.Trim();
+        }
+
         static bool ValidarFecha(string fecha)
         {
             if (fecha.Length != 10)
@@ -157,7 +164,7 @@ namespace MesaDePartesMPT
             do
             {
                 Console.WriteLine("Fecha de recepcion (DD/MM/AAAA):");
-                resultado = Console.ReadLine();
+                resultado = LeerTexto();
                 valida = ValidarFecha(resultado);
 
                 if (!valida)
@@ -216,9 +223,9 @@ namespace MesaDePartesMPT
             do
             {
                 Console.WriteLine(mensaje);
-                resultado = Console.ReadLine();
+                resultado = LeerTexto();
 
-                if (string.IsNullOrWhiteSpace(resultado))
+                if (string.IsNullOrWhiteSpace(resultado)) 
                 {
                     Console.WriteLine("Error: este campo es obligatorio.");
                     Console.WriteLine("Por favor, ingrese un dato.");
@@ -227,8 +234,7 @@ namespace MesaDePartesMPT
 
             return resultado;
         }
-
-    
+        
         //Parte de Gustavo
         static void Registrar(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, string[] tiposTramite, ref int total, int CAPACIDAD)
         {
@@ -257,7 +263,6 @@ namespace MesaDePartesMPT
             string asunto = PedirTextoObligatorio("Asunto:");
             string fecha = PedirFecha();
 
-            
             codigos[total] = codigo;
             solicitantes[total] = solicitante;
             tipos[total] = tipo;
@@ -287,7 +292,6 @@ namespace MesaDePartesMPT
 
         static int BuscarPosicion(string[] codigos, int total, string codeABuscar)
         {
-           
             for (int i = 0; i < total; i++)
             {
                 if (codigos[i] == codeABuscar)
@@ -310,7 +314,7 @@ namespace MesaDePartesMPT
                 }
 
                 Console.WriteLine("Elija el tipo de tramite (1-4):");
-                string input = Console.ReadLine();
+                string input = LeerTexto();
                 esNumero = int.TryParse(input, out opcn);
 
                 if (!esNumero || opcn < 1 || opcn > 4)
@@ -334,7 +338,7 @@ namespace MesaDePartesMPT
             Console.WriteLine("1. Ordenar por codigo");
             Console.WriteLine("2. Ordenar por fecha");
             Console.Write("Elija una opcion (1-2): ");
-            string op = Console.ReadLine();
+            string op = LeerTexto();
 
             if (op == "1")
             {
