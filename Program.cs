@@ -3,20 +3,20 @@ using System;
 namespace MesaDePartesMPT
 {
     class Program
-    {  
-        //Parte de Jhonatan
+    {
+        // Parte de Jhonatan
         static void Main(string[] args)
         {
             int total = 0;
-            int CAPACIDAD = 100;
+            const int CAPACIDAD = 100;
             string opMenu = "0";
 
-            string[] codigos = new string[100];
-            string[] solicitantes = new string[100];
-            string[] tipos = new string[100];
-            string[] asuntos = new string[100];
-            string[] fechas = new string[100];
-            string[] estados = new string[100];
+            string[] codigos = new string[CAPACIDAD];
+            string[] solicitantes = new string[CAPACIDAD];
+            string[] tipos = new string[CAPACIDAD];
+            string[] asuntos = new string[CAPACIDAD];
+            string[] fechas = new string[CAPACIDAD];
+            string[] estados = new string[CAPACIDAD];
             string[] tiposTramite = new string[4];
 
             tiposTramite[0] = "Solicitud administrativa general (FUT)";
@@ -28,7 +28,7 @@ namespace MesaDePartesMPT
             {
                 MostrarMenu();
                 Console.Write("Elija una opcion: ");
-                opMenu = Console.ReadLine();
+                opMenu = LeerTexto();
 
                 if (opMenu == "1")
                 {
@@ -54,7 +54,7 @@ namespace MesaDePartesMPT
                 {
                     Console.WriteLine("ERROR: opcion invalida. Elija un numero del 1 al 5.");
                 }
-                Console.WriteLine(); //simplemente un espacio
+                Console.WriteLine();
             }
         }
 
@@ -95,7 +95,14 @@ namespace MesaDePartesMPT
             }
         }
 
-        //Parte de Patrick
+        //parte de Patrick
+        // Lee una linea del teclado, evita null y quita espacios al inicio y al final
+        static string LeerTexto()
+        {
+            string texto = Console.ReadLine() ?? "";
+            return texto.Trim();
+        }
+
         static bool ValidarFecha(string fecha)
         {
             if (fecha.Length != 10)
@@ -157,7 +164,7 @@ namespace MesaDePartesMPT
             do
             {
                 Console.WriteLine("Fecha de recepcion (DD/MM/AAAA):");
-                resultado = Console.ReadLine();
+                resultado = LeerTexto();
                 valida = ValidarFecha(resultado);
 
                 if (!valida)
@@ -216,9 +223,9 @@ namespace MesaDePartesMPT
             do
             {
                 Console.WriteLine(mensaje);
-                resultado = Console.ReadLine();
+                resultado = LeerTexto();
 
-                if (string.IsNullOrWhiteSpace(resultado))
+                if (string.IsNullOrWhiteSpace(resultado)) 
                 {
                     Console.WriteLine("Error: este campo es obligatorio.");
                     Console.WriteLine("Por favor, ingrese un dato.");
@@ -227,18 +234,182 @@ namespace MesaDePartesMPT
 
             return resultado;
         }
-
+        
         //Parte de Gustavo
-        static void Registrar(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, string[] tiposTramite, ref int total, int CAPACIDAD) { }
-        static void BuscarExpediente(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, int total) { }
-        static int BuscarPosicion(string[] codigos, int total, string codeABuscar) { return -1; }
-        static string PedirTipoTramite(string[] tiposTramite) { return ""; }
+        static void Registrar(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, string[] tiposTramite, ref int total, int CAPACIDAD)
+        {
+            if (total >= CAPACIDAD)
+            {
+                Console.WriteLine("ERROR: capacidad completa.");
+                return; 
+            }
+
+            string codigo = PedirTextoObligatorio("Codigo (ej. EXP-001):").ToUpper();
+
+            if (!ValidarFormatoCodigo(codigo))
+            {
+                Console.WriteLine("ERROR: el codigo debe tener el formato EXP-001. No se registro.");
+                return;
+            }
+
+            if (BuscarPosicion(codigos, total, codigo) != -1)
+            {
+                Console.WriteLine("ERROR: el codigo ya existe. No se registro.");
+                return;
+            }
+
+            string solicitante = PedirTextoObligatorio("Solicitante (ficticio):");
+            string tipo = PedirTipoTramite(tiposTramite);
+            string asunto = PedirTextoObligatorio("Asunto:");
+            string fecha = PedirFecha();
+
+            codigos[total] = codigo;
+            solicitantes[total] = solicitante;
+            tipos[total] = tipo;
+            asuntos[total] = asunto;
+            fechas[total] = fecha;
+            estados[total] = "Recibido";
+            
+            total++; 
+
+            Console.WriteLine("Expediente " + codigo + " registrado correctamente.");
+        }
+
+        static void BuscarExpediente(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, int total)
+        {
+            string cod = PedirTextoObligatorio("¿Cual es su codigo?").ToUpper();
+            int pos = BuscarPosicion(codigos, total, cod);
+
+            if (pos == -1)
+            {
+                Console.WriteLine("No se encontro el codigo");
+            }
+            else
+            {
+                MostrarExpediente(codigos, solicitantes, tipos, asuntos, fechas, estados, pos);
+            }
+        }
+
+        static int BuscarPosicion(string[] codigos, int total, string codeABuscar)
+        {
+            for (int i = 0; i < total; i++)
+            {
+                if (codigos[i] == codeABuscar)
+                {
+                    return i; 
+                }
+            }
+            return -1; 
+        }
+
+        static string PedirTipoTramite(string[] tiposTramite)
+        {
+            int opcn;
+            bool esNumero;
+            do
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    Console.WriteLine((i + 1) + ". " + tiposTramite[i]);
+                }
+
+                Console.WriteLine("Elija el tipo de tramite (1-4):");
+                string input = LeerTexto();
+                esNumero = int.TryParse(input, out opcn);
+
+                if (!esNumero || opcn < 1 || opcn > 4)
+                {
+                    Console.WriteLine("Error: opcion invalida. Elija un numero del 1 al 4.");
+                }
+
+            } while (!esNumero || opcn < 1 || opcn > 4);
+
+            return tiposTramite[opcn - 1]; 
+        }
 
         //Parte de Pedro
-        static void Ordenar(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, int total) { }
-        static void OrdenarPorCodigo(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, int total) { }
-        static void OrdenarPorFecha(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, int total) { }
-        static void Intercambiar(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, int i, int menoor) { }
-        static void IntercambioDatos(string[] arreglo, int i, int j) { }
+        static void Ordenar(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, int total)
+        {
+            if (total == 0)
+            {
+                Console.WriteLine("No hay expedientes para ordenar.");
+                return;
+            }
+
+            Console.WriteLine("1. Ordenar por codigo");
+            Console.WriteLine("2. Ordenar por fecha");
+            Console.Write("Elija una opcion (1-2): ");
+            string op = LeerTexto();
+
+            if (op == "1")
+            {
+                OrdenarPorCodigo(codigos, solicitantes, tipos, asuntos, fechas, estados, total);
+            }
+            else if (op == "2")
+            {
+                OrdenarPorFecha(codigos, solicitantes, tipos, asuntos, fechas, estados, total);
+            }
+            else
+            {
+                Console.WriteLine("Error: Opcion invalida.");
+            }
+        }
+
+        static void OrdenarPorCodigo(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, int total)
+        {
+            for (int i = 0; i < total - 1; i++)
+            {
+                int menor = i;
+                for (int j = i + 1; j < total; j++)
+                {
+                    if (string.Compare(codigos[j], codigos[menor]) < 0)
+                    {
+                        menor = j;
+                    }
+                }
+                if (menor != i)
+                {
+                    Intercambiar(codigos, solicitantes, tipos, asuntos, fechas, estados, i, menor);
+                }
+            }
+            Console.WriteLine("Expedientes ordenados por codigo correctamente.");
+        }
+
+        static void OrdenarPorFecha(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, int total)
+        {
+            for (int i = 0; i < total - 1; i++)
+            {
+                int menor = i;
+                for (int j = i + 1; j < total; j++)
+                {
+                    if (FechaANumero(fechas[j]) < FechaANumero(fechas[menor]))
+                    {
+                        menor = j;
+                    }
+                }
+                if (menor != i)
+                {
+                    Intercambiar(codigos, solicitantes, tipos, asuntos, fechas, estados, i, menor);
+                }
+            }
+            Console.WriteLine("Expedientes ordenados por fecha correctamente.");
+        }
+
+        static void Intercambiar(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, int i, int menor)
+        {
+            IntercambioDatos(codigos, i, menor);
+            IntercambioDatos(solicitantes, i, menor);
+            IntercambioDatos(tipos, i, menor);
+            IntercambioDatos(asuntos, i, menor);
+            IntercambioDatos(fechas, i, menor);
+            IntercambioDatos(estados, i, menor);
+        }
+
+        static void IntercambioDatos(string[] arreglo, int i, int j)
+        {
+            string aux = arreglo[i];
+            arreglo[i] = arreglo[j];
+            arreglo[j] = aux;
+        }
     }
 }
