@@ -326,7 +326,6 @@ namespace MesaDePartesMPT
 
             return tiposTramite[opcn - 1]; 
         }
-
         //Parte de Pedro
         static void Ordenar(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, int total)
         {
