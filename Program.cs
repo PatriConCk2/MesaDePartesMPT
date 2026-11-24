@@ -1,9 +1,12 @@
 using System;
+using System.IO;
 
 namespace MesaDePartesMPT
 {
     class Program
     {
+        const string ARCHIVO = "expedientes.txt";
+
         // Parte de Jhonatan
         static void Main(string[] args)
         {
@@ -23,6 +26,8 @@ namespace MesaDePartesMPT
             tiposTramite[1] = "Licencia de funcionamiento";
             tiposTramite[2] = "Recurso o impugnacion";
             tiposTramite[3] = "Acceso a la informacion publica";
+
+            CargarArchivo(codigos, solicitantes, tipos, asuntos, fechas, estados, ref total, CAPACIDAD);
 
             while (opMenu != "5")
             {
@@ -48,6 +53,7 @@ namespace MesaDePartesMPT
                 }
                 else if (opMenu == "5")
                 {
+                    GuardarArchivo(codigos, solicitantes, tipos, asuntos, fechas, estados, total);
                     Console.WriteLine("Fin del programa.");
                 }
                 else
@@ -220,17 +226,24 @@ namespace MesaDePartesMPT
         static string PedirTextoObligatorio(string mensaje)
         {
             string resultado;
+            bool valido;
             do
             {
                 Console.WriteLine(mensaje);
                 resultado = LeerTexto();
+                valido = !string.IsNullOrWhiteSpace(resultado);
 
-                if (string.IsNullOrWhiteSpace(resultado)) 
+                if (!valido)
                 {
                     Console.WriteLine("Error: este campo es obligatorio.");
                     Console.WriteLine("Por favor, ingrese un dato.");
                 }
-            } while (string.IsNullOrWhiteSpace(resultado));
+                else if (resultado.Contains('|'))
+                {
+                    Console.WriteLine("Error: no se permite el caracter |.");
+                    valido = false;
+                }
+            } while (!valido);
 
             return resultado;
         }
@@ -326,6 +339,68 @@ namespace MesaDePartesMPT
 
             return tiposTramite[opcn - 1]; 
         }
+
+        //Parte de Gustavo (archivos)
+        // Escribe un expediente por linea, con los seis datos separados por |
+        static void GuardarArchivo(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, int total)
+        {
+            using (StreamWriter archivo = new StreamWriter(ARCHIVO))
+            {
+                for (int i = 0; i < total; i++)
+                {
+                    string linea = string.Join("|", codigos[i], solicitantes[i], tipos[i], asuntos[i], fechas[i], estados[i]);
+                    archivo.WriteLine(linea);
+                }
+            }
+            Console.WriteLine("Expedientes guardados en " + ARCHIVO + ": " + total);
+        }
+
+        // Lee el archivo al iniciar; si no existe o esta vacio, el programa sigue con la lista vacia
+        static void CargarArchivo(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, ref int total, int CAPACIDAD)
+        {
+            total = 0;
+
+            if (!File.Exists(ARCHIVO))
+            {
+                Console.WriteLine("No hay archivo previo. Se inicia con la lista vacia.");
+                return;
+            }
+
+            string[] lineas = File.ReadAllLines(ARCHIVO);
+            int ignoradas = 0;
+
+            foreach (string linea in lineas)
+            {
+                if (string.IsNullOrWhiteSpace(linea))
+                {
+                    continue;
+                }
+
+                string[] datos = linea.Split('|');
+
+                if (datos.Length == 6 && total < CAPACIDAD)
+                {
+                    codigos[total] = datos[0];
+                    solicitantes[total] = datos[1];
+                    tipos[total] = datos[2];
+                    asuntos[total] = datos[3];
+                    fechas[total] = datos[4];
+                    estados[total] = datos[5];
+                    total++;
+                }
+                else
+                {
+                    ignoradas++;
+                }
+            }
+
+            Console.WriteLine("Expedientes cargados: " + total);
+            if (ignoradas > 0)
+            {
+                Console.WriteLine("Lineas ignoradas por formato invalido o por capacidad: " + ignoradas);
+            }
+        }
+
         //Parte de Pedro
         static void Ordenar(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, int total)
         {
