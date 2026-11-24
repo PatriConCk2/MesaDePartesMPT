@@ -34,7 +34,7 @@ namespace MesaDePartesMPT
 
             CargarArchivo(codigos, solicitantes, tipos, asuntos, fechas, estados, ref total, CAPACIDAD);
 
-            while (opMenu != "7")
+            while (opMenu != "8")
             {
                 MostrarMenu();
                 Console.Write("Elija una opcion: ");
@@ -66,12 +66,16 @@ namespace MesaDePartesMPT
                 }
                 else if (opMenu == "7")
                 {
+                    ResumenPorTipoYEstado(tipos, estados, tiposTramite, listaEstados, total);
+                }
+                else if (opMenu == "8")
+                {
                     GuardarArchivo(codigos, solicitantes, tipos, asuntos, fechas, estados, total);
                     Console.WriteLine("Fin del programa.");
                 }
                 else
                 {
-                    Console.WriteLine("ERROR: opcion invalida. Elija un numero del 1 al 7.");
+                    Console.WriteLine("ERROR: opcion invalida. Elija un numero del 1 al 8.");
                 }
                 Console.WriteLine();
             }
@@ -86,7 +90,8 @@ namespace MesaDePartesMPT
             Console.WriteLine("4. Ordenar expedientes");
             Console.WriteLine("5. Modificar expediente");
             Console.WriteLine("6. Eliminar expediente");
-            Console.WriteLine("7. Salir");
+            Console.WriteLine("7. Resumen por tipo y estado");
+            Console.WriteLine("8. Salir");
         }
 
         static void MostrarExpediente(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, int pos)
@@ -662,6 +667,74 @@ namespace MesaDePartesMPT
             string aux = arreglo[i];
             arreglo[i] = arreglo[j];
             arreglo[j] = aux;
+        }
+
+        // Resumen con arreglo bidimensional: filas = tipos de tramite, columnas = estados
+        static void ResumenPorTipoYEstado(string[] tipos, string[] estados, string[] tiposTramite, string[] listaEstados, int total)
+        {
+            if (total == 0)
+            {
+                Console.WriteLine("No hay expedientes para resumir.");
+                return;
+            }
+
+            int[,] conteo = new int[4, 3];
+            int sinClasificar = 0;
+
+            for (int i = 0; i < total; i++)
+            {
+                int fila = BuscarPosicion(tiposTramite, 4, tipos[i]);
+                int col = BuscarPosicion(listaEstados, 3, estados[i]);
+
+                if (fila != -1 && col != -1)
+                {
+                    conteo[fila, col]++;
+                }
+                else
+                {
+                    sinClasificar++;
+                }
+            }
+
+            Console.WriteLine("Resumen de expedientes por tipo de tramite y estado");
+            Console.WriteLine();
+            Console.Write("Tipo".PadRight(40));
+            for (int c = 0; c < 3; c++)
+            {
+                Console.Write(listaEstados[c].PadRight(13));
+            }
+            Console.WriteLine("Total");
+
+            int[] totalesColumna = new int[3];
+            int granTotal = 0;
+
+            for (int f = 0; f < 4; f++)
+            {
+                Console.Write(tiposTramite[f].PadRight(40));
+                int totalFila = 0;
+
+                for (int c = 0; c < 3; c++)
+                {
+                    Console.Write(conteo[f, c].ToString().PadRight(13));
+                    totalFila += conteo[f, c];
+                    totalesColumna[c] += conteo[f, c];
+                }
+
+                Console.WriteLine(totalFila);
+                granTotal += totalFila;
+            }
+
+            Console.Write("Total".PadRight(40));
+            for (int c = 0; c < 3; c++)
+            {
+                Console.Write(totalesColumna[c].ToString().PadRight(13));
+            }
+            Console.WriteLine(granTotal);
+
+            if (sinClasificar > 0)
+            {
+                Console.WriteLine("Expedientes con tipo o estado desconocido: " + sinClasificar);
+            }
         }
     }
 }
