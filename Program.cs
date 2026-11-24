@@ -27,9 +27,14 @@ namespace MesaDePartesMPT
             tiposTramite[2] = "Recurso o impugnacion";
             tiposTramite[3] = "Acceso a la informacion publica";
 
+            string[] listaEstados = new string[3];
+            listaEstados[0] = "Recibido";
+            listaEstados[1] = "En revision";
+            listaEstados[2] = "Atendido";
+
             CargarArchivo(codigos, solicitantes, tipos, asuntos, fechas, estados, ref total, CAPACIDAD);
 
-            while (opMenu != "5")
+            while (opMenu != "7")
             {
                 MostrarMenu();
                 Console.Write("Elija una opcion: ");
@@ -53,12 +58,20 @@ namespace MesaDePartesMPT
                 }
                 else if (opMenu == "5")
                 {
+                    ModificarExpediente(codigos, solicitantes, tipos, asuntos, fechas, estados, listaEstados, total);
+                }
+                else if (opMenu == "6")
+                {
+                    EliminarExpediente(codigos, solicitantes, tipos, asuntos, fechas, estados, ref total);
+                }
+                else if (opMenu == "7")
+                {
                     GuardarArchivo(codigos, solicitantes, tipos, asuntos, fechas, estados, total);
                     Console.WriteLine("Fin del programa.");
                 }
                 else
                 {
-                    Console.WriteLine("ERROR: opcion invalida. Elija un numero del 1 al 5.");
+                    Console.WriteLine("ERROR: opcion invalida. Elija un numero del 1 al 7.");
                 }
                 Console.WriteLine();
             }
@@ -71,7 +84,9 @@ namespace MesaDePartesMPT
             Console.WriteLine("2. Buscar expediente por codigo");
             Console.WriteLine("3. Listar expedientes");
             Console.WriteLine("4. Ordenar expedientes");
-            Console.WriteLine("5. Salir");
+            Console.WriteLine("5. Modificar expediente");
+            Console.WriteLine("6. Eliminar expediente");
+            Console.WriteLine("7. Salir");
         }
 
         static void MostrarExpediente(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, int pos)
@@ -408,6 +423,159 @@ namespace MesaDePartesMPT
             if (ignoradas > 0)
             {
                 Console.WriteLine("Lineas ignoradas por formato invalido o por capacidad: " + ignoradas);
+            }
+        }
+
+        //Parte de Jhonatan (modificar y eliminar)
+        // Pide S o N hasta recibir una respuesta valida; devuelve true si es S
+        static bool Confirmar(string pregunta)
+        {
+            string respuesta;
+            do
+            {
+                Console.WriteLine(pregunta + " (S/N):");
+                respuesta = LeerTexto().ToUpper();
+
+                if (respuesta != "S" && respuesta != "N")
+                {
+                    Console.WriteLine("Error: responda S o N.");
+                }
+            } while (respuesta != "S" && respuesta != "N");
+
+            return respuesta == "S";
+        }
+
+        static string PedirEstado(string[] listaEstados)
+        {
+            int opcn;
+            bool esNumero;
+            do
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    Console.WriteLine((i + 1) + ". " + listaEstados[i]);
+                }
+
+                Console.WriteLine("Elija el nuevo estado (1-3):");
+                string input = LeerTexto();
+                esNumero = int.TryParse(input, out opcn);
+
+                if (!esNumero || opcn < 1 || opcn > 3)
+                {
+                    Console.WriteLine("Error: opcion invalida. Elija un numero del 1 al 3.");
+                }
+            } while (!esNumero || opcn < 1 || opcn > 3);
+
+            return listaEstados[opcn - 1];
+        }
+
+        static void ModificarExpediente(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, string[] listaEstados, int total)
+        {
+            if (total == 0)
+            {
+                Console.WriteLine("No hay expedientes para modificar.");
+                return;
+            }
+
+            string cod = PedirTextoObligatorio("Codigo del expediente a modificar:").ToUpper();
+            int pos = BuscarRecursivo(codigos, cod, 0, total);
+
+            if (pos == -1)
+            {
+                Console.WriteLine("No se encontro el codigo");
+                return;
+            }
+
+            MostrarExpediente(codigos, solicitantes, tipos, asuntos, fechas, estados, pos);
+
+            Console.WriteLine("1. Modificar estado");
+            Console.WriteLine("2. Modificar asunto");
+            Console.Write("Elija una opcion (1-2): ");
+            string op = LeerTexto();
+
+            string nuevoValor;
+            if (op == "1")
+            {
+                nuevoValor = PedirEstado(listaEstados);
+            }
+            else if (op == "2")
+            {
+                nuevoValor = PedirTextoObligatorio("Nuevo asunto:");
+            }
+            else
+            {
+                Console.WriteLine("Error: Opcion invalida.");
+                return;
+            }
+
+            if (Confirmar("¿Confirma el cambio?"))
+            {
+                if (op == "1")
+                {
+                    estados[pos] = nuevoValor;
+                }
+                else
+                {
+                    asuntos[pos] = nuevoValor;
+                }
+
+                GuardarArchivo(codigos, solicitantes, tipos, asuntos, fechas, estados, total);
+                Console.WriteLine("Expediente " + cod + " modificado correctamente.");
+            }
+            else
+            {
+                Console.WriteLine("Modificacion cancelada.");
+            }
+        }
+
+        static void EliminarExpediente(string[] codigos, string[] solicitantes, string[] tipos, string[] asuntos, string[] fechas, string[] estados, ref int total)
+        {
+            if (total == 0)
+            {
+                Console.WriteLine("No hay expedientes para eliminar.");
+                return;
+            }
+
+            string cod = PedirTextoObligatorio("Codigo del expediente a eliminar:").ToUpper();
+            int pos = BuscarRecursivo(codigos, cod, 0, total);
+
+            if (pos == -1)
+            {
+                Console.WriteLine("No se encontro el codigo");
+                return;
+            }
+
+            MostrarExpediente(codigos, solicitantes, tipos, asuntos, fechas, estados, pos);
+
+            if (Confirmar("¿Confirma eliminar el expediente " + cod + "?"))
+            {
+                // Desplaza los seis arreglos una posicion a la izquierda
+                for (int i = pos; i < total - 1; i++)
+                {
+                    codigos[i] = codigos[i + 1];
+                    solicitantes[i] = solicitantes[i + 1];
+                    tipos[i] = tipos[i + 1];
+                    asuntos[i] = asuntos[i + 1];
+                    fechas[i] = fechas[i + 1];
+                    estados[i] = estados[i + 1];
+                }
+
+                total--;
+
+                // Limpia la ultima posicion que quedo repetida
+                codigos[total] = "";
+                solicitantes[total] = "";
+                tipos[total] = "";
+                asuntos[total] = "";
+                fechas[total] = "";
+                estados[total] = "";
+
+                GuardarArchivo(codigos, solicitantes, tipos, asuntos, fechas, estados, total);
+                Console.WriteLine("Expediente " + cod + " eliminado correctamente.");
+            }
+            else
+            {
+                Console.WriteLine("Eliminacion cancelada.");
             }
         }
 
