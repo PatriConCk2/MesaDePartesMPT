@@ -305,14 +305,24 @@ namespace MesaDePartesMPT
 
         static int BuscarPosicion(string[] codigos, int total, string codeABuscar)
         {
-            for (int i = 0; i < total; i++)
+            return BuscarRecursivo(codigos, codeABuscar, 0, total);
+        }
+
+        //Parte de Patrick
+        // Busqueda recursiva: revisa la posicion inicio y, si no es, se llama con inicio + 1
+        static int BuscarRecursivo(string[] codigos, string codigo, int inicio, int total)
+        {
+            if (inicio >= total)
             {
-                if (codigos[i] == codeABuscar)
-                {
-                    return i; 
-                }
+                return -1;
             }
-            return -1; 
+
+            if (codigos[inicio] == codigo)
+            {
+                return inicio;
+            }
+
+            return BuscarRecursivo(codigos, codigo, inicio + 1, total);
         }
 
         static string PedirTipoTramite(string[] tiposTramite)
